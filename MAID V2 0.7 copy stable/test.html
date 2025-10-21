@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Maid Organizer Test Page</title>
+  <link rel="stylesheet" href="/maid-styles.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #d4c0a1;
+    }
+    button {
+      background-color: #776655;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      overflow: auto;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Maid Organizer Test Page</h1>
+  <p>Use this page to test if the extension is properly organizing downloads.</p>
+  
+  <div class="section">
+    <h2>Test File Downloads</h2>
+    <button onclick="downloadFile('test-image.jpg')">Download Image (.jpg)</button>
+    <button onclick="downloadFile('test-document.pdf')">Download PDF (.pdf)</button>
+    <button onclick="downloadFile('test-archive.zip')">Download ZIP (.zip)</button>
+    <button onclick="downloadFile('test-music.mp3')">Download Music (.mp3)</button>
+  </div>
+  
+  <div class="section">
+    <h2>Storage Diagnostics</h2>
+    <button onclick="checkStorage()">Check Current Storage</button>
+    <pre id="storage-output">Click the button to view current extension storage...</pre>
+  </div>
+
+  <div class="section">
+    <h2>Extension Status</h2>
+    <button onclick="checkExtensionStatus()">Check Extension Status</button>
+    <pre id="status-output">Click the button to check if the extension is working...</pre>
+  </div>
+  
+  <div class="section">
+    <h2>Test Custom Folders</h2>
+    <div>
+      <label for="url-pattern">URL Pattern:</label>
+      <input type="text" id="url-pattern" placeholder="example.com" />
+      <label for="folder-name">Folder Name:</label>
+      <input type="text" id="folder-name" placeholder="ExampleFolder" />
+      <button onclick="addCustomFilter()">Add Filter</button>
+    </div>
+    <p>After adding, refresh this page and download again to test.</p>
+  </div>
+  
+  <script>
+    function downloadFile(filename) {
+      const extension = filename.split('.').pop();
+      // Create simple files for testing
+      let content;
+      let type;
+      
+      switch(extension) {
+        case 'jpg':
+          // Small 1x1 transparent pixel as base64
+          content = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKAP/2Q==';
+          type = 'image/jpeg';
+          break;
+        case 'pdf':
+          // Minimal PDF structure
+          content = 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PC9DcmVhdG9yIChNZWd1bWluIERvd25sb2FkZXIpCi9Qcm9kdWNlciAoTWVndW1pbiBEb3dubG9hZGVyKQovQ3JlYXRpb25EYXRlIChEOjIwMjMwNTA0MDAwMDAwKQo+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlIC9DYXRhbG9nCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlcwovQ291bnQgMQovS2lkcyBbNSAwIFJdCj4+CmVuZG9iago1IDAgb2JqCjw8L1R5cGUgL1BhZ2UKL01lZGlhQm94IFswIDAgNTk1LjI3NiA4NDEuODldCi9SZXNvdXJjZXMgPDwvRm9udCA8PC9GMSA4IDAgUgo+Pj4+Ci9Db250ZW50cyA2IDAgUgovUGFyZW50IDMgMCBSCj4+CmVuZG9iago2IDAgb2JqCjw8L0xlbmd0aCA4OD4+CnN0cmVhbQpxCjAuNTY2OTI5IHcKMCBHCjI4LjM0NjQ2IDcyLjA0NSBtCjI4LjM0NjQ2IDc2Mi41NiBtCjU2Ni45MjkgNzYyLjU2IG0KNTY2LjkyOSA3Mi4wNDUgbQpzCi9GMSAxMiBUZgoxOTUgNDUwIFRECihUZXN0IGRvY3VtZW50IGZyb20gTWVndW1pbiBEb3dubG9hZGVyKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjggMCBvYmoKPDwvVHlwZSAvRm9udAovQmFzZUZvbnQgL0hlbHZldGljYQovU3VidHlwZSAvVHlwZTEKPj4KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMTEzIDAwMDAwIG4gCjAwMDAwMDAxNjIgMDAwMDAgbiAKMDAwMDAwMDAwMCAwMDAwMCBuIAowMDAwMDAwMjIxIDAwMDAwIG4gCjAwMDAwMDAzNTcgMDAwMDAgbiAKMDAwMDAwMDAwMCAwMDAwMCBuIAowMDAwMDAwNDk2IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA5Ci9Sb290IDIgMCBSCi9JbmZvIDEgMCBSCj4+CnN0YXJ0eHJlZgo1NjQKJSVFT0YK';
+          type = 'application/pdf';
+          break;
+        case 'zip':
+          // Empty ZIP file as base64
+          content = 'data:application/zip;base64,UEsDBBQAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAEUAAAABAAAAMFBLAQIUAxQAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAEUAAAABAAAAAAAAAAAAAACggQAAAABQSwUGAAAAAAEAAQAvAAAAWgAAAAAA';
+          type = 'application/zip';
+          break;
+        case 'mp3':
+          // Empty MP3 file as base64
+          content = 'data:audio/mp3;base64,SUQzBAAAAAABAFRYWFgAAAASAAADVGl0bGUAVGVzdCBGaWxlAFRYWFgAAAAPAAADQXJ0aXN0AE1lZ3VtaW4AVFRZEAAAABIAAANBY2M1MAAxMjM0NTY3ODkwAA==';
+          type = 'audio/mp3';
+          break;
+      }
+      
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = content;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      document.getElementById('status-output').textContent = `Downloading ${filename}...\nCheck your downloads folder to see if it was organized correctly.`;
+    }
+    
+    function checkStorage() {
+      if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+          {action: "getStorage"}, 
+          function(response) {
+            if (response && response.storage) {
+              document.getElementById('storage-output').textContent = JSON.stringify(response.storage, null, 2);
+            } else {
+              document.getElementById('storage-output').textContent = "Error: Could not access storage or extension not responding.";
+            }
+          }
+        );
+      } else {
+        document.getElementById('storage-output').textContent = "Error: Chrome extension API not available.";
+      }
+    }
+    
+    function checkExtensionStatus() {
+      if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+          {action: "checkStatus"}, 
+          function(response) {
+            if (response && response.status) {
+              document.getElementById('status-output').textContent = "Extension is active: " + response.status;
+            } else {
+              document.getElementById('status-output').textContent = "Error: Extension not responding.";
+            }
+          }
+        );
+      } else {
+        document.getElementById('status-output').textContent = "Error: Chrome extension API not available or extension not installed.";
+      }
+    }
+    
+    function addCustomFilter() {
+      const pattern = document.getElementById('url-pattern').value;
+      const folder = document.getElementById('folder-name').value;
+      
+      if (!pattern || !folder) {
+        alert("Please enter both URL pattern and folder name");
+        return;
+      }
+      
+      if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+          {action: "addFilter", pattern: pattern, folder: folder}, 
+          function(response) {
+            if (response && response.success) {
+              alert("Filter added successfully!");
+            } else {
+              alert("Error: Could not add filter.");
+            }
+          }
+        );
+      } else {
+        alert("Error: Chrome extension API not available.");
+      }
+    }
+  </script>
+</body>
+</html>
